@@ -1,20 +1,6 @@
 #!/bin/sh
 # News viewer for sfeed.
 
-# sfeed data directory
-cd ~/.sfeed || exit
-
-# get last access time
-if [ $# -gt 0 ]; then
-	last=$(date -d"$*" +%s) || exit
-else
-	last=$(stat -c%X last)
-	touch last
-fi
-
-# feeds directory
-cd feeds || exit
-
 # list feeds younger than "$last" sorted by time
 newfeeds() {
 	ls |
@@ -37,6 +23,20 @@ feedfmt() {
 		printf("%s  %s  %s  %s\n", feed, date, title, link)
 	}'
 }
+
+# sfeed data directory
+cd ~/.sfeed || exit
+
+# get last access time
+if [ $# -gt 0 ]; then
+	last=$(date -d"$*" +%s) || exit
+else
+	last=$(stat -c%X last)
+	touch last
+fi
+
+# feeds directory
+cd feeds || exit
 
 # open selected feeds in the browser
 newfeeds |
