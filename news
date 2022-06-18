@@ -1,10 +1,25 @@
 #!/bin/sh
 # News viewer for sfeed.
 
-# list feeds younger than "$last" sorted by time
+# sfeed data directory
+sfeedpath=~/.sfeed
+
+# get (and possibly update) last access time
+since() {
+	cd "$sfeedpath" || exit
+	if [ $# -gt 0 ]; then
+		date -d"$*" +%s
+	else
+		stat -c%X last
+		touch last
+	fi
+}
+
+# list feeds younger than $1 sorted by time
 newfeeds() {
+	cd "$sfeedpath/feeds" || exit
 	ls |
-		xargs -rd '\n' awk -v "last=$last" '{
+		xargs -rd '\n' awk -v "last=$1" '{
 			if ($1 > last)
 				print FILENAME "\t" $0
 			else
@@ -24,22 +39,9 @@ feedfmt() {
 	}'
 }
 
-# sfeed data directory
-cd ~/.sfeed || exit
-
-# get last access time
-if [ $# -gt 0 ]; then
-	last=$(date -d"$*" +%s) || exit
-else
-	last=$(stat -c%X last)
-	touch last
-fi
-
-# feeds directory
-cd feeds || exit
-
 # open selected feeds in the browser
-newfeeds |
+last=$(since "$@")
+newfeeds "$last" |
 	feedfmt |
 	dmenu -i -l 10 -p "Since $(date -d "@$last" +'%Y %b %d %H:%M:%S')" |
 	awk '{print $NF}' |
