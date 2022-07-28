@@ -25,7 +25,7 @@ rename() {
 }
 
 [ $# -gt 0 ] || {
-	echo 'usage: mmv FILES...'
+	echo "usage: ${0##*/} FILES..."
 	exit
 }
 [ "$EDITOR" ] || {
