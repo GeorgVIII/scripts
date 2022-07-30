@@ -1,9 +1,10 @@
 #!/bin/sh
 # mass mv
 
-# print to stderr
+# complain and exit
 err() {
 	echo "error: $1" >&2
+	exit 1
 }
 
 # check if line count is the same
@@ -30,20 +31,16 @@ rename() {
 }
 [ "$EDITOR" ] || {
 	err 'EDITOR variable is not set'
-	exit 1
 }
 tmp=$(mktemp -d /tmp/mmvXXX) || {
 	err 'failed to create temporary directory'
-	exit 1
 }
 trap cleanup EXIT
 printf '%s\n' "$@" | tee "$tmp/old" >"$tmp/new"
 $EDITOR "$tmp/new" || {
 	err "$EDITOR terminated with code $?"
-	exit 1
 }
 cmplc "$tmp/old" "$tmp/new" || {
 	err 'different line count'
-	exit 1
 }
 paste -d '\n' "$tmp/old" "$tmp/new" | rename
